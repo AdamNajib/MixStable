@@ -33,10 +33,7 @@ from .utils import (
 )
 from .bayesian import bayesian_mixture_model
 from .testing_data import ( 
-    test_normality,
-    skew_kurtosis,
-    estimate_stable_r,
-    qcv_stat,
-    fit_em_mixture_r
+    analyse_stable_distribution
+
 )
 

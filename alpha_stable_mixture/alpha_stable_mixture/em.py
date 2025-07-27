@@ -173,24 +173,6 @@ def em_stable_mixture(data, u, estimator_func, max_iter=300, epsilon=1e-3):
         "log_likelihood": LV
     }
 
-def E_step(data, params):
-    """Expectation step of EM algorithm."""
-    responsibilities = np.ones((len(data), 2)) / 2
-    return responsibilities
-
-def M_step(data, responsibilities):
-    """Maximization step of EM algorithm."""
-    updated_params = {}
-    return updated_params
-
-def em_algorithm(data, init_params, max_iter=100):
-    """Full EM algorithm for alpha-stable mixture."""
-    params = init_params
-    for _ in range(max_iter):
-        responsibilities = E_step(data, params)
-        params = M_step(data, responsibilities)
-    return params
-
 
 # 🔁 EM algorithm
 def em_fit_alpha_stable_mixture(data, max_iter=200, tol=1e-4):

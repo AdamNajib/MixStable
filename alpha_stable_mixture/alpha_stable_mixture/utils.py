@@ -13,6 +13,48 @@ from scipy.stats import wasserstein_distance
 L_alpha, L_beta, L_delta, L_omega = [], [], [], []
 M_w = []
 
+def log_likelihood_mixture(params, data):
+    """
+    Compute the negative log-likelihood for a mixture of two stable distributions.
+    """
+    # Unpack 9 parameters: w + 2x (alpha, beta, scale, loc)
+    w = params[0]
+    a1, b1, s1, l1 = params[1:5]
+    a2, b2, s2, l2 = params[5:9]
+
+    if not (0 < w < 1 and 0.1 < a1 <= 2 and 0.1 < a2 <= 2 and -1 <= b1 <= 1 and -1 <= b2 <= 1 and s1 > 0 and s2 > 0):
+        return np.inf  # invalid
+    
+    p1 = (a1, b1, s1, l1)
+    p2 = (a2, b2, s2, l2)
+    try:
+        p1 = r_stable_pdf(data, *p1)
+        p2 = r_stable_pdf(data, *p2)
+        mix_pdf = w * p1 + (1 - w) * p2
+        log_likelihood = np.sum(np.log(np.clip(mix_pdf, 1e-300, None)))
+        return -log_likelihood  # for minimization
+    except Exception as e:
+        print("MLE error:", e)
+        return np.inf
+
+def neg_log_likelihood(params, X):
+    alpha, beta, gamma, delta = params
+    if not (0.1 < alpha <= 2 and -1 <= beta <= 1 and gamma > 0):
+        return np.inf
+    return -np.sum(levy_stable.logpdf(X, alpha, beta, loc=delta, scale=gamma))
+
+
+def negative_log_likelihood(params, data):
+    alpha, beta, gamma, delta = params
+    if not (0 < alpha <= 2 and -1 <= beta <= 1 and gamma > 0):
+        return np.inf
+    try:
+        pdf_vals = r_stable_pdf(data, alpha, beta, gamma, delta)
+        log_likelihood = np.sum(np.log(np.clip(pdf_vals, 1e-300, None)))
+        return -log_likelihood
+    except Exception:
+        return np.inf
+
 def unpack_params(p):
     """
     Helper to unpack parameter dictionary into tuple.

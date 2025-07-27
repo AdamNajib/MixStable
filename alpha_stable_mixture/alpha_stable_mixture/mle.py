@@ -3,17 +3,7 @@ from scipy.optimize import minimize
 from .utils import r_stable_pdf
 from alpha_stable_mixture.utils import stable_fit_init
 from scipy.stats import levy_stable
-
-def negative_log_likelihood(params, data):
-    alpha, beta, gamma, delta = params
-    if not (0 < alpha <= 2 and -1 <= beta <= 1 and gamma > 0):
-        return np.inf
-    try:
-        pdf_vals = r_stable_pdf(data, alpha, beta, gamma, delta)
-        log_likelihood = np.sum(np.log(np.clip(pdf_vals, 1e-300, None)))
-        return -log_likelihood
-    except Exception:
-        return np.inf
+from .utils import neg_log_likelihood, log_likelihood_mixture,negative_log_likelihood
 
 def fit_alpha_stable_mle(data):
     alpha0, beta0, gamma0, delta0 = stable_fit_init(data)
@@ -27,31 +17,6 @@ def fit_alpha_stable_mle(data):
         options={'disp': False, 'maxiter': 300}
     )
     return result.x.tolist() if result.success else [np.nan] * 4
-
-def log_likelihood_mixture(params, data):
-    """
-    Compute the negative log-likelihood for a mixture of two stable distributions.
-    """
-    # Unpack 9 parameters: w + 2x (alpha, beta, scale, loc)
-    w = params[0]
-    a1, b1, s1, l1 = params[1:5]
-    a2, b2, s2, l2 = params[5:9]
-
-    if not (0 < w < 1 and 0.1 < a1 <= 2 and 0.1 < a2 <= 2 and -1 <= b1 <= 1 and -1 <= b2 <= 1 and s1 > 0 and s2 > 0):
-        return np.inf  # invalid
-    
-    p1 = (a1, b1, s1, l1)
-    p2 = (a2, b2, s2, l2)
-    try:
-        p1 = r_stable_pdf(data, *p1)
-        p2 = r_stable_pdf(data, *p2)
-        mix_pdf = w * p1 + (1 - w) * p2
-        log_likelihood = np.sum(np.log(np.clip(mix_pdf, 1e-300, None)))
-        return -log_likelihood  # for minimization
-    except Exception as e:
-        print("MLE error:", e)
-        return np.inf
-
 
 def fit_mle_mixture(data):
     init_params = [0.5, 1.3, 0.0, 1.0, -1.5, 1.7, 0.0, 1.5, 4.5]
@@ -116,13 +81,6 @@ def Max_vrai(x):
 
     alpha, beta, gamma, delta = result.x
     return {"alpha": alpha, "beta": beta, "gamma": gamma, "delta": delta}
-
-
-def neg_log_likelihood(params, X):
-    alpha, beta, gamma, delta = params
-    if not (0.1 < alpha <= 2 and -1 <= beta <= 1 and gamma > 0):
-        return np.inf
-    return -np.sum(levy_stable.logpdf(X, alpha, beta, loc=delta, scale=gamma))
 
 def mle_estimate(X, x0=None):
     if x0 is None:
