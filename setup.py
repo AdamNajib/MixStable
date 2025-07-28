@@ -5,7 +5,8 @@ setup(
     version="0.1.0",
     description="Tools for alpha-stable mixture model estimation and simulation",
     author="Adam Najib",
-    packages=find_packages(),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     install_requires=[
         "numpy",
         "scipy",

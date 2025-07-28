@@ -9,3 +9,5 @@ rpy2
 seaborn
 tqdm
 pytest
+arviz
+pymc3

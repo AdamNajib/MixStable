@@ -5,10 +5,10 @@ __version__ = "0.1.0"
 from .em import *
 from .mle import *
 from .ecf_estimators import (
-    ecf_estimate_stable_from_cdf,
-    ecf_estimate_stable_kernel_ecf,
-    ecf_estimate_stable_recursive_ecf,
-    ecf_estimate_stable_weighted_ols
+    estimate_stable_from_cdf,
+    estimate_stable_kernel_ecf,
+    estimate_stable_recursive_ecf,
+    estimate_stable_weighted_ols
 )
 from .em_methode import (
     em_estimate_stable_from_cdf, 
