@@ -12,7 +12,8 @@ def bic(log_likelihood, num_params, n):
 
 def compute_model_metrics(data, params):
     try:
-        pdf_vals = r_stable_pdf(data, *params)
+        alpha, beta, scale, location = params
+        pdf_vals = r_stable_pdf(data, alpha, beta, scale, location)
         log_likelihood = np.sum(np.log(np.clip(pdf_vals, 1e-300, None)))
         k = len(params)
         n = len(data)

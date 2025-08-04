@@ -4,7 +4,11 @@ import matplotlib.pyplot as plt
 from .utils import r_stable_pdf
 from alpha_stable_mixture.gibbs import mock_gibbs_sampling
 from sklearn.metrics import mean_squared_error, log_loss
-
+from alpha_stable_mixture.ecf_estimators import estimate_stable_kernel_ecf, estimate_stable_weighted_ols
+from alpha_stable_mixture.generate_sample import generate_mixture_data
+from alpha_stable_mixture.mle import mle_estimate
+from alpha_stable_mixture.mcculloch import mcculloch_lookup_estimate, build_mcculloch_interpolators, generate_mcculloch_table
+import pandas as pd
 
 def simulate_mixture(n, weights, params):
     samples = []
@@ -91,3 +95,51 @@ def evaluate_fit(data, methods, x_vals):
         scores[name] = {'RMSE': rmse, 'LogLikelihood': ll}
 
     return scores
+
+def compare_estimators_on_simulations(n_samples=1000, n_runs=30,interp_alpha=None, interp_beta= None):
+    """
+    Simulate data and compare MLE, ECF, and McCulloch estimators on alpha-stable distributions.
+
+    Returns:
+        pd.DataFrame: Table of performance metrics for each estimator and run.
+    """
+    results = []
+    u = np.linspace(0.1, 1, 20)
+    for seed in range(n_runs):
+        # Simulate data and true parameters
+        data, true_params = generate_mixture_data(1, n_samples, seed=seed)
+        true = true_params[0] if isinstance(true_params, list) else true_params
+
+        # MLE
+        mle = mle_estimate(data)
+        mse_mle = np.mean([(mle[k] - true[k])**2 for k in ['alpha', 'beta', 'gamma', 'delta']])
+
+        # ECF
+        ecf = estimate_stable_kernel_ecf(data, u)
+        mse_ecf = np.mean([(ecf[k] - true[k])**2 for k in ['alpha', 'beta', 'gamma', 'delta']])
+
+        # McCulloch
+        mc = mcculloch_lookup_estimate(data,interp_alpha, interp_beta)
+        mse_mc = np.mean([(mc[k] - true[k])**2 for k in ['alpha', 'beta', 'gamma', 'delta']])
+
+        results.append({
+            "seed": seed,
+            "method": "MLE",
+            "mse": mse_mle,
+            **mle
+        })
+        results.append({
+            "seed": seed,
+            "method": "ECF",
+            "mse": mse_ecf,
+            **ecf
+        })
+        results.append({
+            "seed": seed,
+            "method": "McCulloch",
+            "mse": mse_mc,
+            **mc
+        })
+
+    df = pd.DataFrame(results)
+    return df

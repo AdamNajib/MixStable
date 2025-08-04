@@ -1,14 +1,9 @@
 import numpy as np
 from sklearn.cluster import KMeans
-from .utils import r_stable_pdf,stable_fit_init
+from .utils import r_stable_pdf,stable_fit_init,unpack_params
 from .ecf_estimators import *
 from numpy import maximum
 
-def unpack_params(p):
-    """
-    Helper to unpack parameter dictionary into tuple.
-    """
-    return p['alpha'], p['beta'], p['gamma'], p['delta']
 
 def em_estimate_stable_recursive_ecf(data, max_iter=100, tol=1e-4):
     """

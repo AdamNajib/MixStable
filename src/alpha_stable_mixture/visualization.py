@@ -9,6 +9,8 @@ from .utils import r_stable_pdf, mixture_stable_pdf
 from .gibbs import mock_gibbs_sampling
 from scipy.stats import levy_stable
 from scipy.interpolate import make_interp_spline
+from .mle import mle_estimate
+from .ecf_estimators import estimate_stable_kernel_ecf 
 
 def plot_distributions(x, params_stable):
     sns.histplot(x, kde=True, stat="density", label="Data", bins=50, color='gray')
@@ -315,6 +317,114 @@ def plot_fit_vs_true(true_params, est_params, data, bins=100):
     plt.plot(x, mixture_pdf(x, est_params), 'r-', lw=2, label='Estimated PDF')
 
     plt.title("True vs Estimated Mixture Density")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+def plot_fit_vs_true_methods(data, true_params, method1="MLE", method2="ECF", bins=100):
+    """
+    Estimate mixture parameters using two methods and plot their fits vs the true mixture.
+
+    Parameters:
+        data (array-like): The observed data.
+        true_params (list of dict): True parameters for each mixture component.
+        method1 (str): First estimation method ("MLE" or "ECF").
+        method2 (str): Second estimation method ("MLE" or "ECF").
+        bins (int): Number of bins for the histogram.
+    """
+    u = np.linspace(0.1, 1, 20)
+
+    # Helper to wrap dicts as list if needed
+    def ensure_list_of_dicts(params):
+        # If it's a tuple, take the first element
+        if isinstance(params, tuple):
+            params = params[0]
+        if isinstance(params, dict):
+            return [params]
+        elif isinstance(params, list):
+            return params
+        else:
+            raise TypeError("Params must be a dict or list of dicts.")
+    true_params = ensure_list_of_dicts(true_params)
+
+    print("true_params before ensure_list_of_dicts:", type(true_params), true_params)
+    true_params = ensure_list_of_dicts(true_params)
+    print("true_params after ensure_list_of_dicts:", type(true_params), true_params)
+
+    # Estimate parameters for method1
+    if method1 == "MLE":
+        est1 = mle_estimate(data)
+    elif method1 == "ECF":
+        est1 = estimate_stable_kernel_ecf(data, u)
+    else:
+        raise ValueError(f"Unknown method: {method1}")
+    
+    print("est1 raw output:", type(est1), est1)
+    est_params1 = ensure_list_of_dicts(est1)
+    print("est_params1 after ensure_list_of_dicts:", type(est_params1), est_params1)
+    est_params1 = ensure_list_of_dicts(est1)
+    for p in est_params1:
+        if 'pi' not in p:
+            p['pi'] = 1.0
+
+
+    # Estimate parameters for method2
+    if method2 == "MLE":
+        est2 = mle_estimate(data)
+    elif method2 == "ECF":
+        est2 = estimate_stable_kernel_ecf(data, u)
+    else:
+        raise ValueError(f"Unknown method: {method2}")
+    print("est2 raw output:", type(est2), est2)
+    est_params2 = ensure_list_of_dicts(est2)
+    print("est_params2 after ensure_list_of_dicts:", type(est_params2), est_params2)
+    for p in est_params2:
+        if 'pi' not in p:
+            p['pi'] = 1.0
+
+
+    # Plot true vs estimated for both methods
+    plt.figure(figsize=(10, 5))
+    x = np.linspace(min(data), max(data), 1000)
+
+    def mixture_pdf(x, params):
+        params = ensure_list_of_dicts(params)
+        y = np.zeros_like(x)
+        for p in params:
+            # Convert all values to Python float
+            alpha = float(p['alpha'])
+            beta = float(p['beta'])
+            gamma = float(p['gamma'])
+            delta = float(p['delta'])
+            pi = float(p['pi'])
+            # Check for nan
+            if any(np.isnan([alpha, beta, gamma, delta, pi])):
+                print("Warning: nan parameter detected, skipping this component:", p)
+                continue
+            y += pi * r_stable_pdf(x, alpha, beta, gamma, delta)
+        return y
+
+    plt.hist(data, bins=bins, density=True, alpha=0.4, label='Data')
+    plt.plot(x, mixture_pdf(x, true_params), 'g--', lw=2, label='True PDF')
+
+    if not any(np.isnan([float(p['alpha']) for p in est_params1] +
+                        [float(p['beta']) for p in est_params1] +
+                        [float(p['gamma']) for p in est_params1] +
+                        [float(p['delta']) for p in est_params1])):
+        plt.plot(x, mixture_pdf(x, est_params1), 'b-', lw=2, label=f'Estimated PDF ({method1})')
+    else:
+        print(f"Skipping plot for {method1} due to nan parameters.")
+
+    if not any(np.isnan([float(p['alpha']) for p in est_params2] +
+                        [float(p['beta']) for p in est_params2] +
+                        [float(p['gamma']) for p in est_params2] +
+                        [float(p['delta']) for p in est_params2])):
+        plt.plot(x, mixture_pdf(x, est_params2), 'r-', lw=2, label=f'Estimated PDF ({method2})')
+    else:
+        print(f"Skipping plot for {method2} due to nan parameters.")
+
+    plt.title(f"True vs Estimated Mixture Density ({method1} vs {method2})")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()

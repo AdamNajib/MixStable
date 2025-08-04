@@ -1,27 +1,24 @@
 import pandas as pd
-import numpy as np
-from sklearn.preprocessing import StandardScaler
+import io
 
-def preprocess_data(data):
-    scaler = StandardScaler()
-    return scaler.fit_transform(data.reshape(-1, 1)).flatten()
+def read_csv_with_auto_delimiter(uploaded_file):
+    try:
+        # Try reading with default comma delimiter
+        df = pd.read_csv(uploaded_file)
+    except Exception:
+        # Try reading with semicolon if comma fails
+        uploaded_file.seek(0)
+        df = pd.read_csv(uploaded_file, delimiter=';')
+    return df
 
 def extract_serial_intervals(df):
-    """
-    Extracts serial intervals from a DataFrame.
-    Priority:
-    1. Use 'serial_interval' column if it exists.
-    2. Otherwise, compute it from 'infector_onsetDate' and 'infectee_onsetDate'.
-    """
-    if "serial_interval" in df.columns:
-        return df["serial_interval"].astype(float).dropna().values
+    possible_cols = ["serial_interval", "serial_interval_mean_based", "mean_serial_interval"]
+    serial_col = next((col for col in possible_cols if col in df.columns), None)
+    if serial_col:
+        return df[serial_col].astype(float).dropna().values
+    else:
+        numeric_cols = df.select_dtypes(include=[float, int]).columns
+        if len(numeric_cols) == 0:
+            raise ValueError("No numeric column found in the uploaded file.")
+        return df[numeric_cols[0]].astype(float).dropna().values
 
-    # Try to compute from onset dates
-    required_cols = ["infector_onsetDate", "infectee_onsetDate"]
-    if all(col in df.columns for col in required_cols):
-        df["infector_onsetDate"] = pd.to_datetime(df["infector_onsetDate"], dayfirst=True, errors='coerce')
-        df["infectee_onsetDate"] = pd.to_datetime(df["infectee_onsetDate"], dayfirst=True, errors='coerce')
-        df["SI"] = (df["infectee_onsetDate"] - df["infector_onsetDate"]).dt.days
-        return df["SI"].dropna().astype(float).values
-
-    raise ValueError("No valid 'serial_interval' column or onset date columns found.")

@@ -84,10 +84,11 @@ def run_all_estimations(X1, bw_sj, max_iter=200, tol=1e-4):
     }
 
     # Plot all results
-    plot_mixture_fit(X1, estimated_params)
-    plot_mixture_fit(X1, estimated_params1)
-    plot_mixture_fit(X1, estimated_params2)
-    plot_mixture_fit(X1, estimated_params3)
+    plot_mixture_fit(X1, estimated_params, save_path="recursive_ecf.png", show_plot=False)
+    plot_mixture_fit(X1, estimated_params1, save_path="kernel_ecf.png", show_plot=False)
+    plot_mixture_fit(X1, estimated_params2, save_path="weighted_ols.png", show_plot=False)
+    plot_mixture_fit(X1, estimated_params3, save_path="cdf_based.png", show_plot=False)
+
 
 import numpy as np
 
@@ -173,7 +174,8 @@ def run_enzyme_estimations_with_gibbs(enzyme_data, bw_sj, max_iter=100, tol=1e-4
     }
 
     # Plot results
-    plot_mixture_fit(X1, estimated_params)
-    plot_mixture_fit(X1, estimated_params1)
-    plot_mixture_fit(X1, estimated_params2)
-    plot_mixture_fit(X1, estimated_params3)
+    plot_mixture_fit(X1, estimated_params, save_path="recursive_ecf_gibbs.png", show_plot=False)
+    plot_mixture_fit(X1, estimated_params1, save_path="kernel_ecf_gibbs.png", show_plot=False)
+    plot_mixture_fit(X1, estimated_params2, save_path="weighted_ols_gibbs.png", show_plot=False)
+    plot_mixture_fit(X1, estimated_params3, save_path="cdf_based_gibbs.png", show_plot=False)
+

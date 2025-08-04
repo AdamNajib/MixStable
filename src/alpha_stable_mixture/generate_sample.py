@@ -12,7 +12,7 @@ def generate_mixture_data(K=2, N=1000, seed=None):
     params = []
     data = []
     for i in range(K):
-        alpha = np.random.uniform(1.3, 1.9)
+        alpha = np.random.uniform(1.3, 1.95)
         beta = np.random.uniform(-1, 1)
         gamma = np.random.uniform(0.5, 2.0)
         delta = np.random.uniform(-2, 2)

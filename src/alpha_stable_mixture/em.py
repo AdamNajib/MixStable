@@ -175,7 +175,7 @@ def em_stable_mixture(data, u, estimator_func, max_iter=300, epsilon=1e-3):
 
 
 # 🔁 EM algorithm
-def em_fit_alpha_stable_mixture(data, max_iter=200, tol=1e-4):
+def em_fit_alpha_stable_mixture(data, max_iter=200, tol=1e-4, return_trace=False):
     """
     EM algorithm to fit a mixture of two alpha-stable distributions.
 
@@ -183,9 +183,13 @@ def em_fit_alpha_stable_mixture(data, max_iter=200, tol=1e-4):
         data (array-like): Input data.
         max_iter (int): Maximum number of iterations.
         tol (float): Convergence tolerance.
+        return_trace (bool): If True, returns the responsibilities and log-likelihood trace.
 
     Returns:
-        tuple: Parameters of the two components and the mixture weight.
+        If return_trace:
+            params1, params2, w, responsibilities_trace, log_likelihoods
+        Else:
+            params1, params2, w
     """
     if len(data) < 2:
         raise ValueError("Input data must contain at least two points.")
@@ -199,7 +203,10 @@ def em_fit_alpha_stable_mixture(data, max_iter=200, tol=1e-4):
     params2 = fit_alpha_stable_mle(data[labels == 1])
     w = np.mean(labels == 0)
 
-    log_likelihood = -np.inf
+    responsibilities_trace = []
+    log_likelihoods = []
+
+    prev_log_likelihood = None
 
     for iteration in range(max_iter):
         # E-step: Compute responsibilities
@@ -207,6 +214,10 @@ def em_fit_alpha_stable_mixture(data, max_iter=200, tol=1e-4):
         pdf2 = np.maximum(r_stable_pdf(data, *params2), 1e-300)
         responsibilities = np.vstack([w * pdf1, (1 - w) * pdf2]).T
         responsibilities /= responsibilities.sum(axis=1, keepdims=True)
+
+        # Store traces if requested
+        if return_trace:
+            responsibilities_trace.append(responsibilities.copy())
 
         # M-step: Update parameters
         labels = np.argmax(responsibilities, axis=1)
@@ -220,17 +231,22 @@ def em_fit_alpha_stable_mixture(data, max_iter=200, tol=1e-4):
         # Compute log-likelihood
         total_pdf = w * pdf1 + (1 - w) * pdf2
         new_log_likelihood = np.sum(np.log(total_pdf))
+        if return_trace:
+            log_likelihoods.append(new_log_likelihood)
 
         print(f"Iteration {iteration}: Log-Likelihood = {new_log_likelihood:.6f}")
 
         # Check for convergence
-        if abs(new_log_likelihood - log_likelihood) / abs(new_log_likelihood) < tol:
-            print("Converged.")
-            break
+        if prev_log_likelihood is not None:
+            if abs(new_log_likelihood - prev_log_likelihood) / (abs(new_log_likelihood) + 1e-12) < tol:
+                print("Converged.")
+                break
+        prev_log_likelihood = new_log_likelihood
 
-        log_likelihood = new_log_likelihood
-
-    return params1, params2, w
+    if return_trace:
+        return params1, params2, w, responsibilities_trace, log_likelihoods
+    else:
+        return params1, params2, w
 
 def em_estimation_mixture(data, max_iter=100, tol=1e-6):
     """
