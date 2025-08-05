@@ -4,6 +4,8 @@ import contextvars
 from io import BytesIO
 import numpy as np
 import warnings
+import os
+import matplotlib.pyplot as plt
 
 # Suppress R warnings for cleaner Streamlit output
 warnings.filterwarnings("ignore", message="R is not initialized by the main thread")
@@ -321,7 +323,7 @@ if uploaded_file:
                             if 'method' in result:
                                 st.info(f"**Method used**: {result['method']}")
 
-                            # Generate and show plot
+                            # Generate and show plot - FIXED VERSION
                             st.markdown(f"### {t('fit_plot')}")
                             try:
                                 # Convert dict params to list format for plotting
@@ -332,22 +334,61 @@ if uploaded_file:
                                     else:
                                         plot_params.append(param)
                                 
-                                # Call plot function with correct signature (p1, p2, w) - NO weights keyword
-                                plot_final_mixture_fit(data, plot_params[0], plot_params[1], result["weights"][0])
-                                
-                                # Show plot
-                                st.image("mixture_alpha_stable_fit_final.png")
-                                with open("mixture_alpha_stable_fit_final.png", "rb") as f:
-                                    st.download_button(
-                                        t("download_fit_plot"), 
-                                        f.read(), 
-                                        file_name="mixture_fit.png", 
-                                        mime="image/png"
+                                # Ensure we have exactly 2 components
+                                if len(plot_params) >= 2:
+                                    # Call plot function with correct signature
+                                    # The plot function expects: plot_final_mixture_fit(data, params1, params2, weight1)
+                                    plot_final_mixture_fit(
+                                        data, 
+                                        plot_params[0],  # First component parameters [alpha, beta, gamma, delta]
+                                        plot_params[1],  # Second component parameters [alpha, beta, gamma, delta]  
+                                        result["weights"][0]  # Weight of first component
                                     )
-                            except FileNotFoundError:
-                                st.warning(t("plot_not_found"))
+                                    
+                                    # Check multiple possible plot filenames
+                                    plot_files = [
+                                        "mixture_alpha_stable_fit_final.png",
+                                        "mixture_fit.png", 
+                                        "alpha_stable_mixture_fit.png",
+                                        "final_mixture_fit.png",
+                                        "mixture_alpha_stable_fit.png"
+                                    ]
+                                    
+                                    plot_found = False
+                                    for plot_file in plot_files:
+                                        if os.path.exists(plot_file):
+                                            st.image(plot_file)
+                                            with open(plot_file, "rb") as f:
+                                                st.download_button(
+                                                    t("download_fit_plot"), 
+                                                    f.read(), 
+                                                    file_name="mixture_fit.png", 
+                                                    mime="image/png"
+                                                )
+                                            plot_found = True
+                                            break
+                                    
+                                    if not plot_found:
+                                        st.warning(t("plot_not_found"))
+                                        st.info("Expected plot files: " + ", ".join(plot_files))
+                                        # Try fallback plotting
+                                        create_fallback_plot(data, result)
+                                        
+                                else:
+                                    st.error("Not enough components for mixture plot")
+                                    
                             except Exception as plot_error:
-                                st.warning(f"Could not generate plot: {plot_error}")
+                                st.error(f"Could not generate original plot: {plot_error}")
+                                st.write("Plot error details:", str(plot_error))
+                                
+                                # Debug information
+                                st.write("Debug info:")
+                                st.write(f"- Number of components: {len(result['params_list'])}")
+                                st.write(f"- Weights: {result['weights']}")
+                                st.write(f"- Data shape: {data.shape}")
+                                
+                                # Try fallback plotting
+                                create_fallback_plot(data, result)
 
                             # Compute metrics - FIX: Handle the parameter format correctly
                             st.markdown(f"### {t('model_metrics')}")
@@ -413,3 +454,123 @@ else:
     
     {t('or_any_numeric')}
     """)
+
+def create_fallback_plot(data, result):
+    """Create a fallback plot using matplotlib when the original plotting fails"""
+    try:
+        st.info("🔄 Creating fallback plot using matplotlib...")
+        
+        # Create a simple histogram with mixture overlay
+        fig, ax = plt.subplots(figsize=(12, 8))
+        
+        # Plot histogram of data
+        ax.hist(data, bins=50, density=True, alpha=0.6, color='lightblue', 
+                edgecolor='black', linewidth=0.5, label='Data')
+        
+        # Plot mixture components if possible
+        x_range = np.linspace(data.min(), data.max(), 1000)
+        
+        # Try to plot using basic approximation
+        try:
+            from scipy import stats
+            
+            total_mixture = np.zeros_like(x_range)
+            
+            for i, (params, weight) in enumerate(zip(result["params_list"], result["weights"])):
+                if isinstance(params, dict):
+                    alpha = params['alpha']
+                    beta = params['beta']
+                    loc = params['delta']
+                    scale = params['gamma']
+                else:
+                    alpha = params[0]
+                    beta = params[1]
+                    scale = params[2]
+                    loc = params[3]
+                
+                # Use different approximations based on alpha
+                if alpha >= 1.8:
+                    # Close to normal, use normal approximation
+                    y = weight * stats.norm.pdf(x_range, loc=loc, scale=scale)
+                elif alpha >= 1.2:
+                    # Use t-distribution approximation for heavy tails
+                    df = max(3, 10 * (alpha - 1))  # Rough approximation
+                    y = weight * stats.t.pdf((x_range - loc) / scale, df=df) / scale
+                else:
+                    # Very heavy tails, use Cauchy approximation
+                    y = weight * stats.cauchy.pdf(x_range, loc=loc, scale=scale)
+                
+                total_mixture += y
+                ax.plot(x_range, y, '--', linewidth=2, alpha=0.8,
+                       label=f'Component {i+1} (α={alpha:.2f}, weight={weight:.3f})')
+            
+            # Plot total mixture
+            ax.plot(x_range, total_mixture, 'r-', linewidth=3, alpha=0.9,
+                   label='Total Mixture')
+            
+            ax.set_xlabel('Value', fontsize=12)
+            ax.set_ylabel('Density', fontsize=12)
+            ax.set_title('Fitted Mixture of Alpha-Stable Distributions\n(Approximation using fallback method)', 
+                        fontsize=14, fontweight='bold')
+            ax.legend(fontsize=10)
+            ax.grid(True, alpha=0.3)
+            
+            # Add some statistics as text
+            stats_text = f"Data points: {len(data)}\n"
+            stats_text += f"Log-likelihood: {result['log_likelihood']:.3f}\n"
+            stats_text += f"Method: {result.get('method', 'Unknown')}"
+            
+            ax.text(0.02, 0.98, stats_text, transform=ax.transAxes, 
+                   verticalalignment='top', bbox=dict(boxstyle='round', 
+                   facecolor='wheat', alpha=0.8))
+            
+            # Save fallback plot
+            plt.tight_layout()
+            plt.savefig('fallback_mixture_plot.png', dpi=150, bbox_inches='tight',
+                       facecolor='white', edgecolor='none')
+            plt.close()
+            
+            # Display the fallback plot
+            st.image('fallback_mixture_plot.png', caption="Mixture Fit (Fallback Plot)")
+            
+            # Offer download
+            with open('fallback_mixture_plot.png', 'rb') as f:
+                st.download_button(
+                    "📥 Download Fallback Plot", 
+                    f.read(), 
+                    file_name="fallback_mixture_plot.png", 
+                    mime="image/png"
+                )
+            
+            st.success("✅ Fallback plot created successfully!")
+                
+        except Exception as scipy_error:
+            st.error(f"SciPy plotting also failed: {scipy_error}")
+            
+            # Ultimate fallback - just show the histogram
+            fig, ax = plt.subplots(figsize=(10, 6))
+            ax.hist(data, bins=30, density=True, alpha=0.7, color='lightblue',
+                   edgecolor='black', label='Data Distribution')
+            ax.set_xlabel('Value')
+            ax.set_ylabel('Density') 
+            ax.set_title('Data Distribution (Histogram Only)')
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            
+            plt.tight_layout()
+            plt.savefig('simple_histogram.png', dpi=150, bbox_inches='tight')
+            plt.close()
+            
+            st.image('simple_histogram.png', caption="Data Histogram")
+            with open('simple_histogram.png', 'rb') as f:
+                st.download_button(
+                    "📥 Download Histogram", 
+                    f.read(), 
+                    file_name="data_histogram.png", 
+                    mime="image/png"
+                )
+            
+    except ImportError:
+        st.warning("⚠️ matplotlib and scipy not available for fallback plotting")
+    except Exception as e:
+        st.error(f"❌ Fallback plotting completely failed: {e}")

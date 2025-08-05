@@ -2,12 +2,14 @@
 """
 Robust interface wrapper for EM algorithms in Streamlit
 This only provides interface wrappers, doesn't modify the original alpha_stable_mixture package
+Fixed version for threading context issues
 """
 
 import numpy as np
-from interface.rpy2_init import run_with_r_context, check_r_availability, ensure_rpy2_context
+from interface.rpy2_init import run_with_r_context, check_r_availability, ensure_rpy2_context, force_reinitialize
 import traceback
 import threading
+import time
 
 def get_fallback_params(data):
     """Get fallback stable distribution parameters using method of moments"""
@@ -40,25 +42,69 @@ def get_fallback_params(data):
     
     return [alpha, beta, scale, location]
 
+def thread_safe_em_call(em_func, data, max_iter=100, tol=1e-4, max_retries=3):
+    """
+    Thread-safe wrapper for EM functions with multiple retry attempts
+    """
+    thread_name = threading.current_thread().name
+    
+    for attempt in range(max_retries):
+        try:
+            print(f"🔧 Thread {thread_name}, Attempt {attempt + 1}: Calling {em_func.__name__}")
+            
+            # Ensure R context is properly set up for this thread
+            if not ensure_rpy2_context():
+                print(f"❌ Thread {thread_name}: Could not establish R context")
+                if attempt < max_retries - 1:
+                    print("🔄 Forcing RPy2 re-initialization...")
+                    force_reinitialize()
+                    time.sleep(0.1)  # Small delay
+                    continue
+                else:
+                    raise RuntimeError("Could not establish R context after retries")
+            
+            print(f"✅ Thread {thread_name}: R context established")
+            
+            # Call the EM function
+            result = em_func(data, max_iter=max_iter, tol=tol)
+            print(f"✅ Thread {thread_name}: EM function completed successfully")
+            return result
+            
+        except Exception as e:
+            error_msg = str(e)
+            print(f"❌ Thread {thread_name}, Attempt {attempt + 1}: EM function failed: {error_msg}")
+            
+            # Check if it's a context/conversion issue
+            if "Conversion rules" in error_msg or "contextvars" in error_msg:
+                print(f"🔄 Thread {thread_name}: Detected RPy2 context issue")
+                if attempt < max_retries - 1:
+                    print("🔄 Forcing RPy2 re-initialization and retrying...")
+                    force_reinitialize()
+                    time.sleep(0.2)  # Longer delay for re-initialization
+                    continue
+            
+            # If it's the last attempt or not a context issue, raise the error
+            if attempt == max_retries - 1:
+                raise e
+            else:
+                print(f"🔄 Thread {thread_name}: Retrying in {0.1 * (attempt + 1)} seconds...")
+                time.sleep(0.1 * (attempt + 1))
+                continue
+    
+    raise RuntimeError(f"All {max_retries} attempts failed")
+
 def safe_em_wrapper(em_func, data, max_iter=100, tol=1e-4):
     """
-    Thread-safe wrapper for EM functions from alpha_stable_mixture.em_methode
+    Enhanced thread-safe wrapper for EM functions from alpha_stable_mixture.em_methode
     """
     def em_call():
-        # Ensure R context is properly set up for this thread
-        if not ensure_rpy2_context():
-            raise RuntimeError("Could not establish R context")
-        
-        print(f"🔧 Thread {threading.current_thread().name}: Calling {em_func.__name__}")
-        return em_func(data, max_iter=max_iter, tol=tol)
+        return thread_safe_em_call(em_func, data, max_iter, tol)
     
     try:
         # Run with proper R context
         return run_with_r_context(em_call)
     except Exception as e:
-        print(f"❌ EM function {em_func.__name__} failed: {e}")
-        if "Conversion rules" in str(e):
-            print("🔄 RPy2 context issue detected, using fallback...")
+        print(f"❌ EM function {em_func.__name__} failed completely: {e}")
         raise e
 
 def create_stable_mixture_result(data, params1, params2, weight, method_name):
@@ -88,12 +134,11 @@ def create_stable_mixture_result(data, params1, params2, weight, method_name):
 def robust_em_stable_mixture(data, u=None, estimator_func=None, max_iter=100, epsilon=1e-3):
     """
     Robust wrapper for EM stable mixture estimation that handles Streamlit threading issues
-    
-    This function calls the original EM functions from alpha_stable_mixture.em_methode
-    but with proper RPy2 context management for Streamlit.
+    Enhanced version with better error handling and retry logic
     """
     
     print(f"🔄 Starting robust EM wrapper for Streamlit...")
+    print(f"🔧 Current thread: {threading.current_thread().name}")
     
     # Validate and clean data
     data = np.asarray(data, dtype=float)
@@ -123,13 +168,20 @@ def robust_em_stable_mixture(data, u=None, estimator_func=None, max_iter=100, ep
     
     print(f"🔧 Using method: {method_key}")
     
-    # Check R availability
-    r_available, r_status = check_r_availability()
-    print(f"R Status: {r_status}")
-    
-    if not r_available:
-        print("❌ R interface not available, using fallback")
-        return simple_mixture_fallback(data)
+    # Check R availability with retry
+    for check_attempt in range(3):
+        r_available, r_status = check_r_availability()
+        print(f"R Status (attempt {check_attempt + 1}): {r_status}")
+        
+        if r_available:
+            break
+        elif check_attempt < 2:
+            print("🔄 R not available, forcing re-initialization...")
+            force_reinitialize()
+            time.sleep(0.2)
+        else:
+            print("❌ R interface not available after retries, using fallback")
+            return simple_mixture_fallback(data)
     
     # Import the EM functions from the original package
     try:
@@ -153,11 +205,11 @@ def robust_em_stable_mixture(data, u=None, estimator_func=None, max_iter=100, ep
         print(f"❌ Could not import EM functions: {e}")
         return simple_mixture_fallback(data)
     
-    # Try the original EM algorithm with proper context
+    # Try the original EM algorithm with enhanced error handling
     try:
         print(f"🔄 Attempting original EM algorithm: {em_func.__name__}")
         
-        # Call with our safe wrapper
+        # Call with our enhanced safe wrapper
         params1, params2, weight = safe_em_wrapper(em_func, data, max_iter, epsilon)
         
         print(f"✅ Original EM succeeded with weight: {weight:.3f}")
@@ -170,7 +222,7 @@ def robust_em_stable_mixture(data, u=None, estimator_func=None, max_iter=100, ep
         return result
         
     except Exception as e:
-        print(f"❌ Original EM failed: {e}")
+        print(f"❌ Original EM failed after all retries: {e}")
         print("🔄 Falling back to simple mixture estimation...")
         return simple_mixture_fallback(data)
 

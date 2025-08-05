@@ -1,7 +1,7 @@
 # interface/rpy2_init.py
 """
 RPy2 initialization module - handles R interface setup with proper context management
-Fixed version for Streamlit compatibility
+Fixed version for Streamlit compatibility with threading context issues
 """
 
 import warnings
@@ -9,6 +9,7 @@ import contextvars
 import threading
 import sys
 import os
+import copy
 
 # Suppress the R main thread warning for Streamlit
 warnings.filterwarnings("ignore", message="R is not initialized by the main thread")
@@ -19,7 +20,7 @@ _alphastable = None
 _qcv_test = None
 _initialized = False
 _lock = threading.Lock()
-_conversion_context = contextvars.ContextVar('rpy2_conversions', default=None)
+_main_converter = None
 
 def get_rpy2_version():
     """Check RPy2 version for compatibility"""
@@ -32,52 +33,96 @@ def get_rpy2_version():
         print(f"Could not determine RPy2 version: {e}")
         return None, None, None
 
-def ensure_rpy2_context():
-    """Ensure RPy2 conversions are active in current thread context"""
+def setup_global_converter():
+    """Set up a global converter that persists across threads"""
+    global _main_converter
+    
     try:
         from rpy2.robjects import pandas2ri, numpy2ri
         from rpy2 import robjects
         
-        major, minor, version = get_rpy2_version()
-        print(f"RPy2 version: {version}")
+        print("🔧 Setting up global RPy2 converter...")
         
-        # Handle different RPy2 versions
+        # Create a combined converter
+        converter = robjects.default_converter
+        
+        # Add pandas and numpy converters
+        try:
+            converter = converter + pandas2ri.converter
+            print("✅ Added pandas2ri converter")
+        except Exception as e:
+            print(f"⚠️ Could not add pandas2ri converter: {e}")
+        
+        try:
+            converter = converter + numpy2ri.converter
+            print("✅ Added numpy2ri converter")
+        except Exception as e:
+            print(f"⚠️ Could not add numpy2ri converter: {e}")
+        
+        # Store globally
+        _main_converter = converter
+        
+        # Set as default converter
+        robjects.conversion.set_conversion(converter)
+        print("✅ Global converter set successfully")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Failed to set up global converter: {e}")
+        return False
+
+def ensure_rpy2_context():
+    """Ensure RPy2 conversions are active in current thread context"""
+    global _main_converter
+    
+    try:
+        from rpy2.robjects import pandas2ri, numpy2ri
+        from rpy2 import robjects
+        
+        # If we have a global converter, use it
+        if _main_converter is not None:
+            try:
+                robjects.conversion.set_conversion(_main_converter)
+                print(f"✅ Thread {threading.current_thread().name}: Using global converter")
+                return True
+            except Exception as e:
+                print(f"⚠️ Could not set global converter in thread: {e}")
+        
+        # Fallback: try to recreate converter in this thread
+        major, minor, version = get_rpy2_version()
         if major is None:
             return False
             
-        # For RPy2 3.x, use different activation methods
+        print(f"RPy2 version: {version}")
+        
+        # For RPy2 3.x, use activation methods
         if major >= 3:
-            # Try new activation method first
             try:
+                # Method 1: Direct activation
                 if hasattr(pandas2ri, 'activate'):
                     pandas2ri.activate()
                 if hasattr(numpy2ri, 'activate'):
                     numpy2ri.activate()
-                print("✅ RPy2 conversions activated (new method)")
+                print(f"✅ Thread {threading.current_thread().name}: Direct activation succeeded")
                 return True
             except Exception as e:
-                print(f"New activation method failed: {e}")
-                
-            # Try alternative activation
+                print(f"Direct activation failed: {e}")
+            
             try:
-                if hasattr(robjects.conversion, 'localconverter'):
-                    # Store in context variable
-                    ctx = robjects.conversion.localconverter(
-                        robjects.default_converter + pandas2ri.converter + numpy2ri.converter
-                    )
-                    _conversion_context.set(ctx)
-                    print("✅ RPy2 conversions set via localconverter")
-                    return True
+                # Method 2: Manual converter setup
+                converter = robjects.default_converter + pandas2ri.converter + numpy2ri.converter
+                robjects.conversion.set_conversion(converter)
+                print(f"✅ Thread {threading.current_thread().name}: Manual converter setup succeeded")
+                return True
             except Exception as e:
-                print(f"Localconverter method failed: {e}")
+                print(f"Manual converter setup failed: {e}")
         
-        # Fallback for older versions
+        # Legacy fallback
         try:
-            if hasattr(pandas2ri, 'ri2py'):
-                robjects.pandas2ri.activate()
-            if hasattr(numpy2ri, 'ri2py'):
-                robjects.numpy2ri.activate()
-            print("✅ RPy2 conversions activated (legacy method)")
+            robjects.pandas2ri.activate()
+            robjects.numpy2ri.activate()
+            print(f"✅ Thread {threading.current_thread().name}: Legacy activation succeeded")
             return True
         except Exception as e:
             print(f"Legacy activation failed: {e}")
@@ -95,7 +140,6 @@ def create_qcv_function():
     """Create QCV function with proper context"""
     try:
         from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
-        from rpy2 import robjects
         
         # Ensure conversions are active before creating R function
         if not ensure_rpy2_context():
@@ -118,13 +162,7 @@ def create_qcv_function():
         }
         """
         
-        # Use conversion context if available
-        ctx = _conversion_context.get()
-        if ctx:
-            with ctx:
-                return SignatureTranslatedAnonymousPackage(qcv_r_code, "qcv_test")
-        else:
-            return SignatureTranslatedAnonymousPackage(qcv_r_code, "qcv_test")
+        return SignatureTranslatedAnonymousPackage(qcv_r_code, "qcv_test")
         
     except Exception as e:
         print(f"Error creating QCV function: {e}")
@@ -136,12 +174,16 @@ def initialize_rpy2():
     
     with _lock:
         if _initialized:
-            # Ensure context is active even if already initialized
+            # Re-ensure context is active for this thread
             ensure_rpy2_context()
             return _libstable4u, _alphastable, _qcv_test
         
         try:
             print("🔄 Initializing RPy2...")
+            
+            # Set up the global converter first
+            if not setup_global_converter():
+                print("⚠️ Could not set up global converter, continuing with thread-local setup")
             
             # Ensure conversions are active
             if not ensure_rpy2_context():
@@ -207,33 +249,33 @@ def get_float_vector():
         return None
 
 def run_with_r_context(func, *args, **kwargs):
-    """Run a function with proper R context - improved version"""
+    """Run a function with proper R context - improved version for threading"""
     try:
-        # Check if we have a conversion context
-        ctx = _conversion_context.get()
+        # Always ensure context is set up for current thread
+        print(f"🔧 Thread {threading.current_thread().name}: Setting up R context...")
         
-        if ctx:
-            # Use the stored conversion context
-            with ctx:
-                return func(*args, **kwargs)
-        else:
-            # Ensure conversions are active and run directly
-            if ensure_rpy2_context():
-                return func(*args, **kwargs)
-            else:
-                raise RuntimeError("Could not establish R context")
+        if not ensure_rpy2_context():
+            raise RuntimeError("Could not establish R context")
+        
+        print(f"🔧 Thread {threading.current_thread().name}: R context established, running function...")
+        return func(*args, **kwargs)
                 
     except Exception as e:
-        print(f"Error running function with R context: {e}")
+        print(f"❌ Thread {threading.current_thread().name}: Error running function with R context: {e}")
+        
         # Try one more time with fresh context setup
         try:
             print("🔄 Attempting to re-establish R context...")
-            if ensure_rpy2_context():
+            
+            # Force re-setup of converter
+            if setup_global_converter() and ensure_rpy2_context():
+                print("🔧 Re-established R context, trying function again...")
                 return func(*args, **kwargs)
             else:
                 raise RuntimeError("Failed to re-establish R context")
+                
         except Exception as e2:
-            print(f"Final attempt failed: {e2}")
+            print(f"❌ Final attempt failed: {e2}")
             raise e2
 
 def check_r_availability():
@@ -253,6 +295,18 @@ def check_r_availability():
         
     except Exception as e:
         return False, f"R interface error: {e}"
+
+def force_reinitialize():
+    """Force re-initialization of RPy2 (useful for threading issues)"""
+    global _initialized, _main_converter
+    print("🔄 Forcing RPy2 re-initialization...")
+    
+    with _lock:
+        _initialized = False
+        _main_converter = None
+        
+        # Re-initialize
+        return initialize_rpy2()
 
 # Initialize once when module is imported (but don't fail if it doesn't work)
 try:
