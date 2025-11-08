@@ -114,6 +114,7 @@ alpha_stable_mixture/
 
 ```
 
+```
 ## 🧩 Package Overview
 ```
 
@@ -128,8 +129,23 @@ alpha_stable_mixture/
 
 ---
 
-## 📊 Example Output
+
+
 ---
+## 📊 Example Output
+
+Example EM fit visualization (from Streamlit app):
+
+Iteration 50/50
+Component 1: α = 1.72, β = 0.05, γ = 1.1, δ = 0.02
+Component 2: α = 1.54, β = -0.10, γ = 0.8, δ = 2.4
+Log-likelihood: -1856.42
+
+---
+
+
+---
+## 📊 Example Output
 
 Example EM fit visualization (from Streamlit app):
 
