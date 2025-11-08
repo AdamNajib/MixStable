@@ -1,7 +1,4 @@
 
----
-
-````markdown
 # 🌌 Alpha-Stable Mixture Estimation Package
 
 [![PyPI Version](https://img.shields.io/pypi/v/alpha-stable-mixture.svg)](https://pypi.org/project/alpha-stable-mixture/)
@@ -113,9 +110,6 @@ alpha_stable_mixture/
 └── requirements.txt
 
 ```
-
-```
-```
 ## 🧩 Package Overview
 
 | Module               | Description                                       |
@@ -126,15 +120,6 @@ alpha_stable_mixture/
 | `generate_sample.py` | Alpha-stable data generation tools                |
 | `interface/`         | Streamlit dashboard and helper scripts            |
 | `tests/`             | Unit and integration tests                        |
-
----
-
-
-
----
-
----
-
 
 ---
 ## 📊 Example Output
@@ -165,15 +150,11 @@ This package provides both simulation tools and inference routines for mixtures 
 
 ---
 
----
 ## 🧩 References
 
 Nolan, J. P. (2020). Univariate Stable Distributions: Models for Heavy Tailed Data.
 McCulloch, J. H. (1986). Simple consistent estimators of stable distribution parameters.
 Press, S. J. (1972). Estimation in univariate and multivariate stable distributions.
-
----
-
 
 ---
 
