@@ -92,7 +92,7 @@ def run_all_estimations(X1, bw_sj, max_iter=200, tol=1e-4):
 
 import numpy as np
 
-def run_enzyme_estimations_with_gibbs(enzyme_data, bw_sj, max_iter=100, tol=1e-4):
+def run_estimations_with_gibbs(enzyme_data, bw_sj, max_iter=100, tol=1e-4):
     """
     Run stable mixture model estimation methods with Gibbs sampling on enzyme data.
 

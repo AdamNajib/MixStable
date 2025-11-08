@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from alpha_stable_mixture.testing_data import analyse_stable_distribution
+from Mixstable.testing_data import analyse_stable_distribution
 
 def test_utils():
     x = np.random.standard_cauchy(1000)

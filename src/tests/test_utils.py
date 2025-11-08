@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from alpha_stable_mixture.utils import log_likelihood_mixture, rstable_py, stable_fit_init
+from Mixstable.utils import log_likelihood_mixture, rstable_py, stable_fit_init
 
 def test_log_likelihood_mixture():
     data = np.random.standard_cauchy(1000)

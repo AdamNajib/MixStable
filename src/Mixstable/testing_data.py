@@ -11,7 +11,7 @@ def _get_r_objects():
     """Get R objects with lazy import to avoid circular dependency"""
     try:
         from rpy2.robjects import FloatVector
-        from alpha_stable_mixture.r_interface import libstable4u, alphastable
+        from Mixtable.r_interface import libstable4u, alphastable
         from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
         
         # Define the QCV R function

@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from alpha_stable_mixture.rt_estimation import RT, est_r0_ml, empirical_r0
+from Mixstable.rt_estimation import RT, est_r0_ml, empirical_r0
 
 def test_rt():
     incidence = np.random.poisson(lam=5, size=30)

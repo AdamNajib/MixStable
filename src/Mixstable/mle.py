@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize
 from .utils import r_stable_pdf
-from alpha_stable_mixture.utils import stable_fit_init
+from Mixstable.utils import stable_fit_init
 from scipy.stats import levy_stable
 from .utils import neg_log_likelihood, log_likelihood_mixture,negative_log_likelihood
 

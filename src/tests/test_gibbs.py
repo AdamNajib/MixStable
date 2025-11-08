@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from alpha_stable_mixture.gibbs import mock_gibbs_sampling, gibbs_sampler, metropolis_hastings
-from alpha_stable_mixture.ecf_estimators import CDF
+from Mixstable.gibbs import mock_gibbs_sampling, gibbs_sampler, metropolis_hastings
+from Mixstable.ecf_estimators import CDF
 
 def test_mock_gibbs_sampling():
     data = np.random.standard_cauchy(1000)

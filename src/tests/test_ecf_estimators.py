@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from alpha_stable_mixture.ecf_estimators import (
+from Mixstable.ecf_estimators import (
     CDF,
     ecf_regression,
     robust_ecf_regression,

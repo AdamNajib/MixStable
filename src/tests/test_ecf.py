@@ -1,7 +1,7 @@
 
 import os
 import numpy as np
-from alpha_stable_mixture import ecf_estimate_all
+from Mixstable import ecf_estimate_all
 
 def test_ecf():
     data = np.random.standard_cauchy(1000)

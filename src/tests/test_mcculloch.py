@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from alpha_stable_mixture.mcculloch import mcculloch_quantile_init, generate_mcculloch_table, build_mcculloch_interpolators, mcculloch_lookup_estimate
+from Mixstable.mcculloch import mcculloch_quantile_init, generate_mcculloch_table, build_mcculloch_interpolators, mcculloch_lookup_estimate
 
 def test_mcculloch_quantile_init():
     data = np.random.standard_cauchy(1000)

@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from alpha_stable_mixture import bayesian_mixture_model
+from Mixstable import bayesian_mixture_model
 import arviz as az
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="cupy._environment")

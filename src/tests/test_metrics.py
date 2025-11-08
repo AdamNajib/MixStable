@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from alpha_stable_mixture import compute_model_metrics
+from Mixstable import compute_model_metrics
 
 def test_metrics():
     data = np.random.standard_cauchy(1000)

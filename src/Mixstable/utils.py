@@ -2,7 +2,7 @@ import numpy as np
 from scipy.integrate import quad
 from scipy.stats import levy_stable
 from rpy2.robjects import FloatVector
-from alpha_stable_mixture.r_interface import libstable4u, stabledist, stats
+from Mixstable.r_interface import libstable4u, stabledist, stats
 from rpy2.rinterface_lib.embedded import RRuntimeError
 from numba import njit, prange
 from .r_interface import stats

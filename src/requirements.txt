@@ -11,4 +11,5 @@ tqdm
 pytest
 arviz
 pymc3
+pytest
 

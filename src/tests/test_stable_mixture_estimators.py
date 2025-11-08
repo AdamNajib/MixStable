@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from alpha_stable_mixture.stable_mixture_estimators import run_all_estimations, run_enzyme_estimations_with_gibbs
+from Mixstable.stable_mixture_estimators import run_all_estimations, run_enzyme_estimations_with_gibbs
 
 def test_run_all_estimations():
     data = np.random.standard_cauchy(1000)

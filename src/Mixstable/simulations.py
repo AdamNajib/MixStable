@@ -2,12 +2,12 @@ import numpy as np
 from scipy.stats import levy_stable
 import matplotlib.pyplot as plt
 from .utils import r_stable_pdf
-from alpha_stable_mixture.gibbs import mock_gibbs_sampling
+from Mixstable.gibbs import mock_gibbs_sampling
 from sklearn.metrics import mean_squared_error, log_loss
-from alpha_stable_mixture.ecf_estimators import estimate_stable_kernel_ecf, estimate_stable_weighted_ols
-from alpha_stable_mixture.generate_sample import generate_mixture_data
-from alpha_stable_mixture.mle import mle_estimate
-from alpha_stable_mixture.mcculloch import mcculloch_lookup_estimate, build_mcculloch_interpolators, generate_mcculloch_table
+from Mixstable.ecf_estimators import estimate_stable_kernel_ecf, estimate_stable_weighted_ols
+from Mixstable.generate_sample import generate_mixture_data
+from Mixstable.mle import mle_estimate
+from Mixstable.mcculloch import mcculloch_lookup_estimate, build_mcculloch_interpolators, generate_mcculloch_table
 import pandas as pd
 
 def simulate_mixture(n, weights, params):
