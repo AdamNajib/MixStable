@@ -21,7 +21,7 @@ def test_mock_gibbs_sampling():
         for ll, params in samples:
             f.write(f"Log-likelihood: {ll:.2f}, Params: {params}\n")
 
-    print("✅ mock_gibbs_sampling test completed. Output saved to:", output_path)
+    print("mock_gibbs_sampling test completed. Output saved to:", output_path)
 
 def test_gibbs_sampler():
     data = np.random.normal(loc=0, scale=1, size=500)
@@ -37,7 +37,7 @@ def test_gibbs_sampler():
         for s in samples:
             f.write(f"{s}\n")
 
-    print("✅ gibbs_sampler test completed. Output saved to:", output_path)
+    print("gibbs_sampler test completed. Output saved to:", output_path)
 
 def test_metropolis_hastings():
     data = np.random.standard_cauchy(1000)
@@ -55,7 +55,7 @@ def test_metropolis_hastings():
         for r in result:
             f.write(str(r) + "\n")
 
-    print("✅ metropolis_hastings test completed. Output saved to:", output_path)
+    print("metropolis_hastings test completed. Output saved to:", output_path)
 
 if __name__ == "__main__":
     test_mock_gibbs_sampling()

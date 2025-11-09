@@ -1,9 +1,9 @@
 
-# 🌌 Alpha-Stable Mixture Estimation Package
+# 🌌 MixStable — Alpha-Stable Mixture Estimation Package
 
-[![PyPI Version](https://img.shields.io/pypi/v/alpha-stable-mixture.svg)](https://pypi.org/project/alpha-stable-mixture/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/alpha-stable-mixture.svg)](https://pypi.org/project/alpha-stable-mixture/)
-[![License](https://img.shields.io/pypi/l/alpha-stable-mixture.svg)](https://pypi.org/project/alpha-stable-mixture/)
+[![PyPI Version](https://img.shields.io/pypi/v/Mixstable.svg)](https://pypi.org/project/Mixstable/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/Mixstable.svg)](https://pypi.org/project/Mixstable/)
+[![License](https://img.shields.io/pypi/l/Mixstable.svg)](https://pypi.org/project/Mixstable/)
 
 A comprehensive Python package for **simulating**, **estimating**, and **visualizing** alpha-stable mixture distributions.  
 This toolkit is designed for statisticians, data scientists, and researchers working with **heavy-tailed** or **skewed data**, where Gaussian models fail to capture real-world complexity.
@@ -69,7 +69,7 @@ streamlit run interface/app.py
 Estimate parameters from synthetic data:
 
 ```python
-from alpha_stable_mixture import generate_sample, em
+from mixstable import generate_sample, em
 
 # Generate alpha-stable samples
 samples = generate_sample.generate_alpha_stable(alpha=1.7, beta=0, gamma=1, delta=0, size=1000)
@@ -99,7 +99,7 @@ Python dependencies (auto-installed from `requirements.txt`):
 ```
 alpha_stable_mixture/
 │
-├── src/alpha_stable_mixture/    # Core modules
+├── src/mixstable/    # Core modules
 │   ├── em.py, gibbs.py, ecf.py, ...
 │   └── interface/               # Streamlit dashboard
 │
@@ -150,19 +150,26 @@ This package provides both simulation tools and inference routines for mixtures 
 
 ---
 
-## 🧩 References
+## 📚 References
 
-Nolan, J. P. (2020). Univariate Stable Distributions: Models for Heavy Tailed Data.
-McCulloch, J. H. (1986). Simple consistent estimators of stable distribution parameters.
-Press, S. J. (1972). Estimation in univariate and multivariate stable distributions.
+Hajjaji, O., Manou-Abi, S. M., & Slaoui, Y. (2024).
+Parameter estimation for stable distributions and their mixture.
+Journal of Applied Statistics, 52(8), 1594–1627.
+https://doi.org/10.1080/02664763.2024.2434627
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Authors
+
+**Solym Manou-Abi**
+Email: \[[solym.manou.abi@univ-poitiers.fr](mailto:solym.manou.abi@univ-poitiers.fr)]
 
 **Adam Najib**
 Email: \[[najibadam145@gmail.com](mailto:najibadam145@gmail.com)]
 GitHub: [@AdamNajib](https://github.com/AdamNajib)
+
+**Yousri Slaoui**
+Email: \[[Yousri.Slaoui@math.univ-poitiers.fr](mailto:Yousri.Slaoui@math.univ-poitiers.fr)]
 
 ---
 

@@ -18,7 +18,7 @@ def test_metrics():
         for key, value in result.items():
             f.write(f"{key}: {value}\n")
 
-    print("✅ Metrics test completed. Output saved to:", output_path)
+    print("Metrics test completed. Output saved to:", output_path)
 
 if __name__ == "__main__":
     test_metrics()

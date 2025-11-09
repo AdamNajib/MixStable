@@ -18,7 +18,7 @@ def test_ecf():
         for key, value in result.items():
             f.write(f"{key}: {value}\n")
 
-    print("✅ ECF test completed. Output saved to:", output_path)
+    print("ECF test completed. Output saved to:", output_path)
 
 if __name__ == "__main__":
     test_ecf()

@@ -19,7 +19,7 @@ def test_log_likelihood_mixture():
     with open(output_path, "w") as f:
         f.write(f"Negative Log-Likelihood: {result}\n")
 
-    print("✅ log_likelihood_mixture test completed. Output saved to:", output_path)
+    print("log_likelihood_mixture test completed. Output saved to:", output_path)
 
 if __name__ == "__main__":
     test_log_likelihood_mixture()
@@ -36,7 +36,7 @@ def test_rstable_py():
         for val in samples:
             f.write(f"{val}\n")
 
-    print("✅ rstable_py test completed. Output saved to:", output_path)
+    print("rstable_py test completed. Output saved to:", output_path)
 
 def test_stable_fit_init():
     data = np.random.standard_cauchy(1000)
@@ -55,7 +55,7 @@ def test_stable_fit_init():
         f.write(f"gamma: {gamma}\n")
         f.write(f"delta: {delta}\n")
 
-    print("✅ stable_fit_init test completed. Output saved to:", output_path)
+    print("stable_fit_init test completed. Output saved to:", output_path)
 
 
 if __name__ == "__main__":

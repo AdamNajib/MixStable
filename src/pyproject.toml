@@ -3,12 +3,14 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "alpha_stable_mixture"
-version = "0.1.1"
-description = "Tools for alpha-stable mixture model estimation and simulation"
+name = "Mixstable"
+version = "0.1.3"
+description="Parameter estimation tools for one-dimensional stable distributions and their mixtures.",
 readme = "README.md"
 authors = [
+    {name = "Solym Manou-Abi"}
     {name = "Adam Najib"}
+    {name = "Yousri Slaoui"}
 ]
 requires-python = ">=3.8"
 dependencies = [

@@ -22,11 +22,11 @@ def test_bayesian():
     summary_path = os.path.join(result_dir, "bayesian_summary.txt")
     with open(summary_path, "w") as f:
         f.write(str(summary))
-    print("📊 Summary saved to:", summary_path)
+    print("Summary saved to:", summary_path)
 
     with open(output_path, "w") as f:
         f.write(str(trace))
-    print("✅ Bayesian test completed. Output saved to:", output_path)
+    print("Bayesian test completed. Output saved to:", output_path)
 
 if __name__ == "__main__":
     test_bayesian()

@@ -51,13 +51,13 @@ def em_estimate_stable_recursive_ecf_with_gibbs(data, max_iter=100, tol=1e-4):
             best1, _ = mock_gibbs_sampling(data[labels == 0])
             params1 = dict(zip(['alpha', 'beta', 'gamma', 'delta'], best1[1:5]))
         else:
-            print("⚠️ Cluster 0 too small. Reusing previous estimate.")
+            print("Cluster 0 too small. Reusing previous estimate.")
 
         if np.sum(labels == 1) >= 5:
             best2, _ = mock_gibbs_sampling(data[labels == 1])
             params2 = dict(zip(['alpha', 'beta', 'gamma', 'delta'], best2[5:9]))
         else:
-            print("⚠️ Cluster 1 too small. Reusing previous estimate.")
+            print("Cluster 1 too small. Reusing previous estimate.")
 
         # Log-likelihood
         pdf1 = np.maximum(r_stable_pdf(data, *unpack_params(params1)), 1e-300)
@@ -67,7 +67,7 @@ def em_estimate_stable_recursive_ecf_with_gibbs(data, max_iter=100, tol=1e-4):
         print(f"[Gibbs EM] Iteration {iteration}: Log-Likelihood = {log_likelihood:.6f}")
 
         if abs(log_likelihood - log_likelihood_old) < tol:
-            print(f"✅ Converged after {iteration} iterations.")
+            print(f"Converged after {iteration} iterations.")
             break
 
         log_likelihood_old = log_likelihood
@@ -117,13 +117,13 @@ def em_estimate_stable_kernel_ecf_with_gibbs(data, max_iter=100, tol=1e-4):
             best1, _ = mock_gibbs_sampling(data[labels == 0])
             params1 = dict(zip(['alpha', 'beta', 'gamma', 'delta'], best1[1:5]))
         else:
-            print("⚠️ Cluster 0 too small. Reusing previous estimate.")
+            print("Cluster 0 too small. Reusing previous estimate.")
 
         if np.sum(labels == 1) >= 5:
             best2, _ = mock_gibbs_sampling(data[labels == 1])
             params2 = dict(zip(['alpha', 'beta', 'gamma', 'delta'], best2[5:9]))
         else:
-            print("⚠️ Cluster 1 too small. Reusing previous estimate.")
+            print("Cluster 1 too small. Reusing previous estimate.")
 
         # Log-likelihood
         pdf1 = np.maximum(r_stable_pdf(data, *unpack_params(params1)), 1e-300)
@@ -133,7 +133,7 @@ def em_estimate_stable_kernel_ecf_with_gibbs(data, max_iter=100, tol=1e-4):
         print(f"[Gibbs EM] Iteration {iteration}: Log-Likelihood = {log_likelihood:.6f}")
 
         if abs(log_likelihood - log_likelihood_old) < tol:
-            print(f"✅ Converged after {iteration} iterations.")
+            print(f"Converged after {iteration} iterations.")
             break
 
         log_likelihood_old = log_likelihood
@@ -178,13 +178,13 @@ def em_estimate_stable_weighted_ols_with_gibbs(data, max_iter=100, tol=1e-4):
             best1, _ = mock_gibbs_sampling(data[labels == 0])
             params1 = dict(zip(['alpha', 'beta', 'gamma', 'delta'], best1[1:5]))
         else:
-            print("⚠️ Cluster 0 too small. Reusing previous estimate.")
+            print("Cluster 0 too small. Reusing previous estimate.")
 
         if np.sum(labels == 1) >= 5:
             best2, _ = mock_gibbs_sampling(data[labels == 1])
             params2 = dict(zip(['alpha', 'beta', 'gamma', 'delta'], best2[5:9]))
         else:
-            print("⚠️ Cluster 1 too small. Reusing previous estimate.")
+            print("Cluster 1 too small. Reusing previous estimate.")
 
         pdf1 = np.maximum(r_stable_pdf(data, *unpack_params(params1)), 1e-300)
         pdf2 = np.maximum(r_stable_pdf(data, *unpack_params(params2)), 1e-300)
@@ -193,7 +193,7 @@ def em_estimate_stable_weighted_ols_with_gibbs(data, max_iter=100, tol=1e-4):
         print(f"[Gibbs EM] Iteration {iteration}: Log-Likelihood = {log_likelihood:.6f}")
 
         if abs(log_likelihood - log_likelihood_old) < tol:
-            print(f"✅ Converged after {iteration} iterations.")
+            print(f"Converged after {iteration} iterations.")
             break
 
         log_likelihood_old = log_likelihood
@@ -238,13 +238,13 @@ def em_estimate_stable_from_cdf_with_gibbs(data, max_iter=100, tol=1e-4):
             best1, _ = mock_gibbs_sampling(data[labels == 0])
             params1 = dict(zip(['alpha', 'beta', 'gamma', 'delta'], best1[1:5]))
         else:
-            print("⚠️ Cluster 0 too small. Reusing previous estimate.")
+            print("Cluster 0 too small. Reusing previous estimate.")
 
         if np.sum(labels == 1) >= 5:
             best2, _ = mock_gibbs_sampling(data[labels == 1])
             params2 = dict(zip(['alpha', 'beta', 'gamma', 'delta'], best2[5:9]))
         else:
-            print("⚠️ Cluster 1 too small. Reusing previous estimate.")
+            print("Cluster 1 too small. Reusing previous estimate.")
 
         pdf1 = np.maximum(r_stable_pdf(data, *unpack_params(params1)), 1e-300)
         pdf2 = np.maximum(r_stable_pdf(data, *unpack_params(params2)), 1e-300)
@@ -253,7 +253,7 @@ def em_estimate_stable_from_cdf_with_gibbs(data, max_iter=100, tol=1e-4):
         print(f"[Gibbs EM] Iteration {iteration}: Log-Likelihood = {log_likelihood:.6f}")
 
         if abs(log_likelihood - log_likelihood_old) < tol:
-            print(f"✅ Converged after {iteration} iterations.")
+            print(f"Converged after {iteration} iterations.")
             break
 
         log_likelihood_old = log_likelihood

@@ -16,7 +16,7 @@ def test_rt():
         for i, val in enumerate(rt_values):
             f.write(f"Day {i}: Rt = {val:.4f}\n")
 
-    print("✅ RT test completed. Output saved to:", output_path)
+    print("RT test completed. Output saved to:", output_path)
 
 def test_est_r0_ml():
     incidence = np.random.poisson(lam=5, size=30)
@@ -31,7 +31,7 @@ def test_est_r0_ml():
     with open(output_path, "w") as f:
         f.write(f"Estimated R0 (ML): {r0:.4f}\n")
 
-    print("✅ est_r0_ml test completed. Output saved to:", output_path)
+    print("est_r0_ml test completed. Output saved to:", output_path)
 
 
 def test_empirical_r0():
@@ -47,7 +47,7 @@ def test_empirical_r0():
     with open(output_path, "w") as f:
         f.write(f"Estimated R0 (empirical): {r0:.4f}\n")
 
-    print("✅ empirical_r0 test completed. Output saved to:", output_path)
+    print("empirical_r0 test completed. Output saved to:", output_path)
 
 if __name__ == "__main__":
     test_rt()

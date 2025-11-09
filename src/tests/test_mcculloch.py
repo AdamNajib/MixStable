@@ -17,7 +17,7 @@ def test_mcculloch_quantile_init():
         for key, value in result.items():
             f.write(f"{key}: {value}\n")
 
-    print("✅ McCulloch quantile init test completed. Output saved to:", output_path)
+    print("McCulloch quantile init test completed. Output saved to:", output_path)
 
 def test_mcculloch_lookup_estimate():
     alpha_grid = np.linspace(0.6, 2.0, 5)
@@ -40,7 +40,7 @@ def test_mcculloch_lookup_estimate():
         for key, value in result.items():
             f.write(f"{key}: {value}\n")
 
-    print("✅ McCulloch lookup estimate test completed. Output saved to:", output_path)
+    print("McCulloch lookup estimate test completed. Output saved to:", output_path)
 
 if __name__ == "__main__":
     test_mcculloch_lookup_estimate()

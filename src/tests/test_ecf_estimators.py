@@ -41,12 +41,12 @@ def test_ecf_estimators():
             with open(output_path, "w") as f:
                 for key, value in result.items():
                     f.write(f"{key}: {value}\n")
-            print(f"✅ {name} test completed. Output saved to:", output_path)
+            print(f"{name} test completed. Output saved to:", output_path)
         except Exception as e:
             error_path = os.path.join(result_dir, f"{name}_error.txt")
             with open(error_path, "w") as f:
-                f.write(f"❌ Error in {name}: {e}\n")
-            print(f"❌ {name} test failed. Error saved to:", error_path)
+                f.write(f"Error in {name}: {e}\n")
+            print(f"{name} test failed. Error saved to:", error_path)
 
 if __name__ == "__main__":
     test_ecf_estimators()
