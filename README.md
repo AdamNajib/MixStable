@@ -10,39 +10,45 @@ This toolkit is designed for statisticians, data scientists, and researchers wor
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-🔍 **Robust Estimation Methods**
+**Robust Estimation Methods**
 - Empirical Characteristic Function (ECF) estimators: kernel-based and weighted OLS  
 - Maximum Likelihood Estimation (MLE)  
 - Quantile-based and CDF-based approaches  
 
-🧠 **Mixture Modeling with EM**
+**Mixture Modeling with EM**
 - EM algorithm for two-component alpha-stable mixtures  
 - Flexible estimator choice inside the EM loop  
 - Optional integration with **Gibbs sampling** for Bayesian refinement  
 
-📈 **Visualization & Simulation**
+**Visualization & Simulation**
 - Generate synthetic alpha-stable data  
 - Built-in visualization tools and an **interactive Streamlit dashboard**  
 
-🔗 **R Integration (via `rpy2`)**
+**R Integration (via `rpy2`)**
 - Uses R’s `stabledist` package to evaluate stable densities and CDFs  
 - Leverage mature R statistical methods directly from Python  
 
-🧪 **Testing & Evaluation**
+**Testing & Evaluation**
 - Built-in diagnostics and model-fit tools  
 - Evaluation metrics and example datasets  
 
 ---
 
-## 🚀 Installation
+## Installation
 
-Clone the repository and install in editable mode:
+Install directly from PyPI:
 
 ```bash
-git clone https://github.com/yourname/alpha_stable_mixture.git
-cd alpha_stable_mixture
+pip install Mixstable
+```
+
+Or clone the repository and install in editable mode:
+
+```bash
+git clone https://github.com/AdamNajib/MixStable.git
+cd MixStable
 pip install -e .
 ````
 
@@ -54,7 +60,7 @@ install.packages("stabledist")
 
 ---
 
-## 🧪 Running the Interactive Dashboard
+## Running the Interactive Dashboard
 
 To launch the Streamlit app for interactive parameter tuning and visualization:
 
@@ -64,7 +70,7 @@ streamlit run interface/app.py
 
 ---
 
-## 🛠️ Usage Example
+## Usage Example
 
 Estimate parameters from synthetic data:
 
@@ -81,7 +87,7 @@ print(result['params'])
 
 ---
 
-## 📦 Requirements
+## Requirements
 
 * Python ≥ 3.8
 * R (if using `r_interface`)
@@ -94,23 +100,24 @@ Python dependencies (auto-installed from `requirements.txt`):
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-alpha_stable_mixture/
+Mixstable/
 │
-├── src/mixstable/    # Core modules
-│   ├── em.py, gibbs.py, ecf.py, ...
-│   └── interface/               # Streamlit dashboard
+├── src/   
+│   ├── Mixstable/                    # Core modules
+│   │   └── em.py, gibbs.py, ecf.py, ...
+│   ├── interface/               # Streamlit dashboard
+│   └── tests/                   # Test scripts
 │
-├── tests/                       # Test scripts
 ├── README.md
 ├── setup.py
 ├── pyproject.toml
 └── requirements.txt
 
 ```
-## 🧩 Package Overview
+## Package Overview
 
 | Module               | Description                                       |
 | :------------------- | :------------------------------------------------ |
@@ -122,18 +129,19 @@ alpha_stable_mixture/
 | `tests/`             | Unit and integration tests                        |
 
 ---
-## 📊 Example Output
+## Example Output
 
+```yaml
 Example EM fit visualization (from Streamlit app):
 
 Iteration 50/50
 Component 1: α = 1.72, β = 0.05, γ = 1.1, δ = 0.02
 Component 2: α = 1.54, β = -0.10, γ = 0.8, δ = 2.4
 Log-likelihood: -1856.42
-
+```
 ---
 
-## 🧠 Theoretical Background
+## Theoretical Background
 
 Alpha-stable distributions generalize the Gaussian family to model heavy-tailed and skewed data.
 They are defined by four parameters:
@@ -150,7 +158,7 @@ This package provides both simulation tools and inference routines for mixtures 
 
 ---
 
-## 📚 References
+## References
 
 Hajjaji, O., Manou-Abi, S. M., & Slaoui, Y. (2024).
 Parameter estimation for stable distributions and their mixture.
@@ -159,7 +167,7 @@ https://doi.org/10.1080/02664763.2024.2434627
 
 ---
 
-## 👨‍💻 Authors
+## Authors
 
 **Solym Manou-Abi**
 Email: \[[solym.manou.abi@univ-poitiers.fr](mailto:solym.manou.abi@univ-poitiers.fr)]
