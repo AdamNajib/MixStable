@@ -3,7 +3,7 @@
 
 [![PyPI Version](https://img.shields.io/pypi/v/Mixstable.svg)](https://pypi.org/project/Mixstable/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/Mixstable.svg)](https://pypi.org/project/Mixstable/)
-[![License](https://img.shields.io/pypi/l/Mixstable.svg)](https://pypi.org/project/Mixstable/)
+
 
 A comprehensive Python package for **simulating**, **estimating**, and **visualizing** alpha-stable mixture distributions.  
 This toolkit is designed for statisticians, data scientists, and researchers working with **heavy-tailed** or **skewed data**, where Gaussian models fail to capture real-world complexity.
@@ -48,7 +48,7 @@ Or clone the repository and install in editable mode:
 
 ```bash
 git clone https://github.com/AdamNajib/MixStable.git
-cd MixStable
+cd src
 pip install -e .
 ````
 
